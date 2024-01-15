@@ -147,3 +147,6 @@ dist
 # Ignore all local history of files
 .history
 .ionide
+
+# Secret.js (API KEY)
+src/javascript/secret.js

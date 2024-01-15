@@ -1,0 +1,11 @@
+{
+  "name": "apirest-practico",
+  "version": "1.0.0",
+  "description": "Curso práctico de API REST con Platzi",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@lgan",
+  "license": "MIT"
+}
