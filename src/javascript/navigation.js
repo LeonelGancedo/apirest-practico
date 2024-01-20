@@ -1,6 +1,6 @@
-searchFormBtn.addEventListener('click', () => location.hash = '#search=')
+searchFormBtn.addEventListener('click', () => location.hash = `#search=${searchFormInput.value}`)
 trendingBtn.addEventListener('click', () => location.hash = '#trends')
-arrowBtn.addEventListener('click', () => location.hash = '#home')
+arrowBtn.addEventListener('click', () => history.back())
 
 
 window.addEventListener('DOMContentLoaded', navigator, false)
@@ -20,6 +20,8 @@ function navigator() {
     } else {
         homePage()
     }
+
+    window.scroll(0,0)
 }
 
 function homePage() {
@@ -60,9 +62,7 @@ function categoryPage() {
 
     const categoryData = location.hash.split('=id')[1]
     const [catId, catName] = categoryData.split('-')
-
-    headerCategoryTitle.innerHTML = catName
-    window.scroll(0,0)
+    headerCategoryTitle.innerHTML = decodeURI(catName)
     getMoviesByCategory(catId)
 }
 function moviePage() {
@@ -81,7 +81,8 @@ function moviePage() {
     genericSection.classList.add('inactive')
     movieDetailSection.classList.remove('inactive')
 
-
+    const movieId = location.hash.split('=')[1]
+    getMovieById(movieId)
 }
 function searchPage() {
     console.log('Busquedas');
@@ -91,7 +92,7 @@ function searchPage() {
     arrowBtn.classList.remove('inactive')
     arrowBtn.classList.remove('header-arrow--white')
     headerTitle.classList.add('inactive')
-    headerCategoryTitle.classList.remove('inactive')
+    headerCategoryTitle.classList.add('inactive')
     searchForm.classList.remove('inactive')
 
     trendingPreviewSection.classList.add('inactive')
@@ -99,7 +100,8 @@ function searchPage() {
     genericSection.classList.remove('inactive')
     movieDetailSection.classList.add('inactive')
 
-
+    const movieName = location.hash.split('=')[1]
+    getMoviesBySearch(movieName)
 }
 function trendsPage() {
     console.log('Trends');
@@ -117,6 +119,6 @@ function trendsPage() {
     genericSection.classList.remove('inactive')
     movieDetailSection.classList.add('inactive')
 
-
+    headerCategoryTitle.innerHTML = 'Tendencias'
+    getTrendingMovies()
 }
-
