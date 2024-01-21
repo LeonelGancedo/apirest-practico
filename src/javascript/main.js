@@ -13,8 +13,19 @@ const api = axios.create({
 const API_URL = 'https://api.themoviedb.org/3/'
 
 // Funciones personalizadas
+const lazyLoader =  new IntersectionObserver((entries) => {
+    entries.forEach(element => { 
+        if (element.isIntersecting) {
+            console.log({element});
+            const url = element.target.getAttribute('data-src')
+            element.target.setAttribute('src', url)
+            lazyLoader.unobserve(element.target)
+        }
+    })
+})
+
 const createEl = (el) => document.createElement(el)
-const createMovies = (iterable, sec) => {
+const createMovies = (iterable, sec, lazyLoad = false) => {
     sec.innerHTML = "";
     iterable.forEach(element => {
         const movieContainer = createEl('div')
@@ -22,8 +33,12 @@ const createMovies = (iterable, sec) => {
         const movieImg = createEl('img')
         movieImg.classList.add('movie-img')
         movieImg.setAttribute('alt',element.title)
-        movieImg.setAttribute('src',`https://image.tmdb.org/t/p/w300${element.poster_path}`)
+        movieImg.setAttribute(lazyLoad ? 'data-src' : 'src',`https://image.tmdb.org/t/p/w300${element.poster_path}`)
         movieContainer.addEventListener('click', () => location.hash = `#movie=${element.id}`)
+
+        if(lazyLoad) {
+            lazyLoader.observe(movieImg)
+        }
         movieContainer.appendChild(movieImg)
         sec.appendChild(movieContainer)
     });
@@ -50,7 +65,7 @@ const createCategories = (iterable, sec) => {
 const getTrendingMoviesPreview = async () => {
     const { data } = await api('trending/movie/week')
     const movies = data.results
-    createMovies(movies,trendingMoviesPreviewList)
+    createMovies(movies,trendingMoviesPreviewList,true)
 }
 const getCategoriesPreview = async () => {
     const { data } = await api('genre/movie/list')
@@ -97,5 +112,5 @@ const getMovieById = async (id) => {
 const getRelatedMoviesById = async (id) => {
     const { data } = await api(`movie/${id}/similar`)
     const movies = data.results
-    createMovies(movies,relatedMoviesContainer)
+    createMovies(movies,relatedMoviesContainer, true)
 }
