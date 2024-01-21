@@ -16,7 +16,6 @@ const API_URL = 'https://api.themoviedb.org/3/'
 const lazyLoader =  new IntersectionObserver((entries) => {
     entries.forEach(element => { 
         if (element.isIntersecting) {
-            console.log({element});
             const url = element.target.getAttribute('data-src')
             element.target.setAttribute('src', url)
             lazyLoader.unobserve(element.target)
@@ -34,6 +33,9 @@ const createMovies = (iterable, sec, lazyLoad = false) => {
         movieImg.classList.add('movie-img')
         movieImg.setAttribute('alt',element.title)
         movieImg.setAttribute(lazyLoad ? 'data-src' : 'src',`https://image.tmdb.org/t/p/w300${element.poster_path}`)
+        movieImg.addEventListener('error', () => {
+            movieImg.setAttribute('src','https://static.platzi.com/static/images/error/img404.png')
+        })
         movieContainer.addEventListener('click', () => location.hash = `#movie=${element.id}`)
 
         if(lazyLoad) {
@@ -79,7 +81,7 @@ const getMoviesByCategory = async (id) => {
         }
     })
     const movies = data.results
-    createMovies(movies,genericSection)
+    createMovies(movies,genericSection,true)
 }
 const getMoviesBySearch = async (query) => {
     const { data } = await api('search/movie', {
@@ -88,12 +90,12 @@ const getMoviesBySearch = async (query) => {
         }
     })
     const movies = data.results
-    createMovies(movies,genericSection)
+    createMovies(movies,genericSection, true)
 }
 const getTrendingMovies = async () => {
     const { data } = await api('trending/movie/week')
     const movies = data.results
-    createMovies(movies,genericSection)
+    createMovies(movies,genericSection, true)
 }
 const getMovieById = async (id) => {
     const { data: movie } = await api(`movie/${id}`)
