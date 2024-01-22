@@ -24,8 +24,10 @@ const lazyLoader =  new IntersectionObserver((entries) => {
 })
 
 const createEl = (el) => document.createElement(el)
-const createMovies = (iterable, sec, lazyLoad = false) => {
-    sec.innerHTML = "";
+const createMovies = (iterable, sec, {lazyLoad = false, clean = true} = {}) => {
+    if(clean) {
+        sec.innerHTML = "";
+    }
     iterable.forEach(element => {
         const movieContainer = createEl('div')
         movieContainer.classList.add('movie-container')
@@ -63,11 +65,11 @@ const createCategories = (iterable, sec) => {
     });   
 }
 
-//Funciones de llamado al API
+//Llamado a la API
 const getTrendingMoviesPreview = async () => {
     const { data } = await api('trending/movie/week')
     const movies = data.results
-    createMovies(movies,trendingMoviesPreviewList,true)
+    createMovies(movies,trendingMoviesPreviewList,{lazyLoad: true})
 }
 const getCategoriesPreview = async () => {
     const { data } = await api('genre/movie/list')
@@ -81,7 +83,7 @@ const getMoviesByCategory = async (id) => {
         }
     })
     const movies = data.results
-    createMovies(movies,genericSection,true)
+    createMovies(movies,genericSection,{lazyLoad:true})
 }
 const getMoviesBySearch = async (query) => {
     const { data } = await api('search/movie', {
@@ -90,12 +92,23 @@ const getMoviesBySearch = async (query) => {
         }
     })
     const movies = data.results
-    createMovies(movies,genericSection, true)
+    createMovies(movies,genericSection, {lazyLoad: true})
 }
-const getTrendingMovies = async () => {
-    const { data } = await api('trending/movie/week')
+const getTrendingMovies = async (page = 1) => {
+    const {scrollTop, scrollHeight, clientHeight } = document.documentElement
+    const { data } = await api('trending/movie/week',{
+        params: {
+            page,
+        }
+    })
     const movies = data.results
-    createMovies(movies,genericSection, true)
+    createMovies(movies,genericSection, {lazyLoad: true, clean: page == 1})
+    const scrollIsBotton = clientHeight + scrollTop >= (scrollHeight-15) 
+    window.addEventListener('scroll', () => {
+        if (scrollIsBotton) {
+            getTrendingMovies(page+1)
+        }
+    } )
 }
 const getMovieById = async (id) => {
     const { data: movie } = await api(`movie/${id}`)
@@ -114,5 +127,5 @@ const getMovieById = async (id) => {
 const getRelatedMoviesById = async (id) => {
     const { data } = await api(`movie/${id}/similar`)
     const movies = data.results
-    createMovies(movies,relatedMoviesContainer, true)
+    createMovies(movies,relatedMoviesContainer, {lazyLoad:true})
 }
