@@ -79,6 +79,8 @@ function categoryPage() {
     const [catId, catName] = categoryData.split('-')
     headerCategoryTitle.innerHTML = decodeURI(catName)
     getMoviesByCategory(catId)
+    infiniteScroll = getPaginatedMoviesByCategory(catId)
+
 }
 function moviePage() {
     console.log('Peliculas');
@@ -117,6 +119,8 @@ function searchPage() {
 
     const movieName = location.hash.split('=')[1]
     getMoviesBySearch(movieName)
+    infiniteScroll = getPaginatedMoviesBySearch(movieName)
+
 }
 function trendsPage() {
     console.log('Trends');

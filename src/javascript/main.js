@@ -83,6 +83,8 @@ const getMoviesByCategory = async (id) => {
         }
     })
     const movies = data.results
+    maxPage = data.total_pages
+
     createMovies(movies,genericSection,{lazyLoad:true})
 
 }
@@ -93,7 +95,9 @@ const getMoviesBySearch = async (query) => {
         }
     })
     const movies = data.results
+    maxPage = data.total_pages
     createMovies(movies,genericSection, {lazyLoad: true})
+
 }
 const getTrendingMovies = async () => {
     const { data } = await api('trending/movie/week')
@@ -134,4 +138,40 @@ const getPaginatedTrendingMovies = async () =>  {
             const movies = data.results
             createMovies(movies,genericSection, {lazyLoad: true, clean: page == 1})
         }
+} 
+const getPaginatedMoviesBySearch =  (query) =>  {
+    return async () => {
+        const {scrollTop, scrollHeight, clientHeight } = document.documentElement
+        const scrollIsBotton = clientHeight + scrollTop >= (scrollHeight-25) 
+        const pageIsNotMax = page < maxPage
+        if (scrollIsBotton && pageIsNotMax) {
+                page++
+                const { data } = await api('search/movie',{
+                    params: {
+                        query,
+                        page,
+                    }
+                })
+                const movies = data.results
+                createMovies(movies,genericSection, {lazyLoad: true, clean: page == 1})
+            }
+    }
+} 
+const getPaginatedMoviesByCategory =  (id) =>  {
+    return async () => {
+        const {scrollTop, scrollHeight, clientHeight } = document.documentElement
+        const scrollIsBotton = clientHeight + scrollTop >= (scrollHeight-25) 
+        const pageIsNotMax = page < maxPage
+        if (scrollIsBotton && pageIsNotMax) {
+                page++
+                const { data } = await api('discover/movie',{
+                    params: {
+                        with_genres: id,
+                        page,
+                    }
+                })
+                const movies = data.results
+                createMovies(movies,genericSection, {lazyLoad: true, clean: page == 1})
+            }
+    }
 } 
