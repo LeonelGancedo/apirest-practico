@@ -84,6 +84,7 @@ const getMoviesByCategory = async (id) => {
     })
     const movies = data.results
     createMovies(movies,genericSection,{lazyLoad:true})
+
 }
 const getMoviesBySearch = async (query) => {
     const { data } = await api('search/movie', {
@@ -94,21 +95,11 @@ const getMoviesBySearch = async (query) => {
     const movies = data.results
     createMovies(movies,genericSection, {lazyLoad: true})
 }
-const getTrendingMovies = async (page = 1) => {
-    const {scrollTop, scrollHeight, clientHeight } = document.documentElement
-    const { data } = await api('trending/movie/week',{
-        params: {
-            page,
-        }
-    })
+const getTrendingMovies = async () => {
+    const { data } = await api('trending/movie/week')
     const movies = data.results
-    createMovies(movies,genericSection, {lazyLoad: true, clean: page == 1})
-    const scrollIsBotton = clientHeight + scrollTop >= (scrollHeight-15) 
-    window.addEventListener('scroll', () => {
-        if (scrollIsBotton) {
-            getTrendingMovies(page+1)
-        }
-    } )
+    maxPage = data.total_pages
+    createMovies(movies,genericSection, {lazyLoad: true})
 }
 const getMovieById = async (id) => {
     const { data: movie } = await api(`movie/${id}`)
@@ -129,3 +120,18 @@ const getRelatedMoviesById = async (id) => {
     const movies = data.results
     createMovies(movies,relatedMoviesContainer, {lazyLoad:true})
 }
+const getPaginatedTrendingMovies = async () =>  {
+    const {scrollTop, scrollHeight, clientHeight } = document.documentElement
+    const scrollIsBotton = clientHeight + scrollTop >= (scrollHeight-25) 
+    const pageIsNotMax = page < maxPage
+    if (scrollIsBotton && pageIsNotMax) {
+            page++
+            const { data } = await api('trending/movie/week',{
+                params: {
+                    page,
+                }
+            })
+            const movies = data.results
+            createMovies(movies,genericSection, {lazyLoad: true, clean: page == 1})
+        }
+} 
