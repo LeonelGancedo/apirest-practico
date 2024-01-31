@@ -12,6 +12,29 @@ const api = axios.create({
 })
 const API_URL = 'https://api.themoviedb.org/3/'
 
+const likedMovieList = () => {
+    const item = JSON.parse(localStorage.getItem('liked_movies'))
+    let movies
+    if (item) {
+        movies = item
+    } else {
+        movies = {}
+    }
+    
+    return movies
+}
+const likeMovie = (movie) => {
+    const likedMovies = likedMovieList()
+    if (likedMovies[movie.id]) {
+        console.log('Ya esta, se sacó')
+        likedMovies[movie.id] = undefined
+    } else {
+        console.log('No esta, se agregó');
+        likedMovies[movie.id] = movie
+    }
+    localStorage.setItem('liked_movies', JSON.stringify(likedMovies))
+}
+
 // Funciones personalizadas
 const lazyLoader =  new IntersectionObserver((entries) => {
     entries.forEach(element => { 
@@ -38,12 +61,22 @@ const createMovies = (iterable, sec, {lazyLoad = false, clean = true} = {}) => {
         movieImg.addEventListener('error', () => {
             movieImg.setAttribute('src','https://static.platzi.com/static/images/error/img404.png')
         })
-        movieContainer.addEventListener('click', () => location.hash = `#movie=${element.id}`)
+        movieImg.addEventListener('click', () => location.hash = `#movie=${element.id}`)
+        
+        const movieBtn = createEl('button')
+        movieBtn.classList.add('movie-btn')
+        likedMovieList()[element.id] && movieBtn.classList.add('movie-btn--liked')
+        movieBtn.addEventListener('click', () => {
+            movieBtn.classList.toggle('movie-btn--liked')
+            likeMovie(element)
+            getLikedMovies()
+        })
 
         if(lazyLoad) {
             lazyLoader.observe(movieImg)
         }
         movieContainer.appendChild(movieImg)
+        movieContainer.appendChild(movieBtn)
         sec.appendChild(movieContainer)
     });
 }
@@ -175,3 +208,8 @@ const getPaginatedMoviesByCategory =  (id) =>  {
             }
     }
 } 
+const getLikedMovies = () => {
+    const likedMovies = likedMovieList()
+    const moviesArray = Object.values(likedMovies)
+    createMovies(moviesArray, likedMoviesContainer, {lazyLoad: true,  clean: true})
+}
